@@ -49,6 +49,7 @@ UploaderRouter.post('/add-to-temp', (req, res) => {
     });
 });
 UploaderRouter.post('/move-to-gallery', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(req.body);
     const images = req.body.images;
     if (!images || images.length === 0) {
         res.status(400).json({ success: false, error: "No images provided!" });
@@ -79,6 +80,7 @@ UploaderRouter.post('/move-to-gallery', (req, res) => __awaiter(void 0, void 0, 
         });
     }
     catch (err) {
+        console.log(err);
         res.status(500).json({ success: false, error: `Internal server error:` });
     }
 }));
@@ -100,6 +102,43 @@ UploaderRouter.post("/delete-image", (req, res) => __awaiter(void 0, void 0, voi
     catch (error) {
         console.log(error);
         res.json({ success: false, error: "Failed to delete image" });
+    }
+}));
+UploaderRouter.post("/delete-images", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const imagesFolder = path_1.default.join(__dirname, '../public/images/gallery');
+    const { images } = req.body.data; // Array of image names
+    if (!Array.isArray(images) || images.length === 0) {
+        res.json({ success: false, error: "Invalid or empty image list" });
+        return;
+    }
+    let deletedImages = [];
+    let failedImages = [];
+    try {
+        for (const imageName of images) {
+            const imagePath = path_1.default.join(imagesFolder, imageName);
+            if (fs_extra_1.default.existsSync(imagePath)) {
+                // Delete the image file
+                fs_extra_1.default.unlinkSync(imagePath);
+                deletedImages.push(imageName);
+            }
+            else {
+                failedImages.push({ imageName, error: "Image not found" });
+            }
+        }
+        if (failedImages.length > 0) {
+            res.json({
+                success: false,
+                message: "Some images could not be deleted",
+                deletedImages,
+                failedImages
+            });
+            return;
+        }
+        res.json({ success: true, message: "All images deleted successfully", deletedImages });
+    }
+    catch (error) {
+        console.error(error);
+        res.json({ success: false, error: "An error occurred while deleting images" });
     }
 }));
 exports.default = UploaderRouter;
