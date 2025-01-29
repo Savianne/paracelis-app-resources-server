@@ -20,6 +20,12 @@ app.use(bodyParser.json());
 //Setup CORS
 app.use(cors());
 
+// app.use(cors({
+//   origin: 'http://paracelis-tourist-app.site/', // Replace with your frontend's URL
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+//   credentials: true, // Allow cookies or authorization headers
+// }));
+
 app.use(serveStatic(path.join(__dirname, '../public')))
 
 app.use('/uploader', UploaderRouter);
